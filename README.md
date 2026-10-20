@@ -1,14 +1,17 @@
 # vwap-reversion
 
 Сервис торговой стратегии (возврат к VWAP) для учебной практики
-"Проектирование информационных систем" (платформа `omsu.7bits.it`). Задание 1:
-каркас серверного приложения на Go stdlib и эндпоинт проверки состояния
-`GET /health`. Задание 2: Kafka-интеграция — регистрация сервиса на
-платформе, heartbeat, приём рыночных свечей `market.candle.closed`. Сама
-логика торговой стратегии — в последующих заданиях.
+"Проектирование информационных систем" (платформа `omsu.7bits.it`). 
+
+- Задание 1:  
+каркас серверного приложения на Go stdlib и эндпоинт проверки состояния `GET /health`. 
+- Задание 2: Kafka-интеграция — регистрация сервиса на  
+платформе, heartbeat, приём рыночных свечей `market.candle.closed`. 
 
 **Автор:** Шишин Алексей Олегович
+  
 **Проектный документ:** [docs/project-description.md](docs/project-description.md)
+  
 **Трекер задач:** [GitHub Issues](https://github.com/omsu-informational-systems/alexey-shishin-go/issues)
 
 ## Требования к окружению
@@ -16,34 +19,36 @@
 - Go 1.23+ — для сборки без Docker.
 - Docker — для сборки и запуска в контейнере.
 - Единственная внешняя зависимость — `github.com/segmentio/kafka-go` (pure
-  Go, без cgo/librdkafka).
+Go, без cgo/librdkafka).
 - Для подключения к Kafka нужны реальные учётные данные, выданные
-  преподавателем (см. таблицу переменных ниже) — без них сервис не
-  запускается (`config.Load()` вернёт ошибку с именем отсутствующей
-  переменной).
+преподавателем (см. таблицу переменных ниже) — без них сервис не
+запускается (`config.Load()` вернёт ошибку с именем отсутствующей
+переменной).
 
 ## Переменные окружения
 
-| Переменная | Назначение | Дефолт |
-|---|---|---|
-| `PORT` | TCP-порт HTTP-сервера | `8080` |
-| `SERVICE_NAME` | Имя сервиса в ответе `/health` и в событиях регистрации | `vwap-reversion` |
-| `SERVICE_VERSION` | Версия (SemVer) в ответе `/health` | `0.1.0` |
-| `KAFKA_BOOTSTRAP_SERVERS` | Адрес(а) брокера, через запятую | — (обязательна, секрет платформы) |
-| `KAFKA_USERNAME` | Логин SASL_SSL/SCRAM-SHA-256 | — (обязательна, секрет) |
-| `KAFKA_PASSWORD` | Пароль SASL_SSL/SCRAM-SHA-256 | — (обязательна, секрет) |
-| `KAFKA_GROUP_ID` | Базовый consumer-group id; код добавляет суффиксы `.registration`/`.candles` для разных читателей | — (обязательна) |
-| `CANDLE_TOPIC` | Топик со свечами `market.candle.closed` | — (обязательна, выдаёт преподаватель) |
-| `TOPIC_REGISTRATION_REQUEST` | Топик запроса регистрации | `account.registration.request` |
-| `TOPIC_REGISTRATION_RESULT` | Топик результата регистрации | `account.registration.result` |
-| `TOPIC_HEARTBEAT` | Топик heartbeat | `account.service.heartbeat` |
-| `ACCOUNT_SECRET_KEY` | Секрет аккаунта для регистрации | — (обязательна, секрет) |
-| `ACCOUNT_ID` | Идентификатор аккаунта | — (обязательна) |
-| `ACCOUNT_NAME` | Имя аккаунта | — (обязательна) |
-| `GROUP_ID` | Учебная группа (выдаёт преподаватель) | — (обязательна) |
-| `STRATEGY_ID` | Идентификатор стратегии | — (обязательна) |
-| `STRATEGY_NAME` | Имя стратегии | — (обязательна) |
-| `DESCRIPTION` | Необязательное описание в запросе регистрации | `` (пусто) |
+
+| Переменная                   | Назначение                                                                                        | Дефолт                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `PORT`                       | TCP-порт HTTP-сервера                                                                             | `8080`                                |
+| `SERVICE_NAME`               | Имя сервиса в ответе `/health` и в событиях регистрации                                           | `vwap-reversion`                      |
+| `SERVICE_VERSION`            | Версия (SemVer) в ответе `/health`                                                                | `0.1.0`                               |
+| `KAFKA_BOOTSTRAP_SERVERS`    | Адрес(а) брокера, через запятую                                                                   | — (обязательна, секрет платформы)     |
+| `KAFKA_USERNAME`             | Логин SASL\_SSL/SCRAM-SHA-256                                                                     | — (обязательна, секрет)               |
+| `KAFKA_PASSWORD`             | Пароль SASL\_SSL/SCRAM-SHA-256                                                                    | — (обязательна, секрет)               |
+| `KAFKA_GROUP_ID`             | Базовый consumer-group id; код добавляет суффиксы `.registration`/`.candles` для разных читателей | — (обязательна)                       |
+| `CANDLE_TOPIC`               | Топик со свечами `market.candle.closed`                                                           | — (обязательна, выдаёт преподаватель) |
+| `TOPIC_REGISTRATION_REQUEST` | Топик запроса регистрации                                                                         | `account.registration.request`        |
+| `TOPIC_REGISTRATION_RESULT`  | Топик результата регистрации                                                                      | `account.registration.result`         |
+| `TOPIC_HEARTBEAT`            | Топик heartbeat                                                                                   | `account.service.heartbeat`           |
+| `ACCOUNT_SECRET_KEY`         | Секрет аккаунта для регистрации                                                                   | — (обязательна, секрет)               |
+| `ACCOUNT_ID`                 | Идентификатор аккаунта                                                                            | — (обязательна)                       |
+| `ACCOUNT_NAME`               | Имя аккаунта                                                                                      | — (обязательна)                       |
+| `GROUP_ID`                   | Учебная группа (выдаёт преподаватель)                                                             | — (обязательна)                       |
+| `STRATEGY_ID`                | Идентификатор стратегии                                                                           | — (обязательна)                       |
+| `STRATEGY_NAME`              | Имя стратегии                                                                                     | — (обязательна)                       |
+| `DESCRIPTION`                | Необязательное описание в запросе регистрации                                                     | \`\` (пусто)                          |
+
 
 Пример (имена переменных без секретных значений) — в `.env.example`. Секреты
 в Git не хранятся.
@@ -64,7 +69,7 @@ docker build -t vwap-reversion .
 docker run --rm -p 8080:8080 vwap-reversion
 ```
 
-Остановка (graceful shutdown по SIGTERM): `docker stop <container_id>`.
+Остановка (graceful shutdown по SIGTERM): `docker stop [[ORCA_RICH_MD:f30fbdbe72eb254c0a4123d6a6182d2b:inline-html:%3Ccontainer_id%3E]]`.
 
 ## Проверка состояния
 
