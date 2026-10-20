@@ -1,0 +1,33 @@
+@startuml context
+title vwap-reversion — контекстная диаграмма (Задание 2)
+
+actor "Куратор практики\n(заказчик)" as Curator
+actor "Студент-оператор\n(разработчик/оператор)" as Student
+
+skinparam nodesep 150
+skinparam ranksep 60
+
+rectangle "vwap-reversion\n(сервис торговой стратегии)" as Service
+
+rectangle "Преподавательская платформа omsu.7bits.it" as Platform {
+  interface "HTTP API заданий\n(Basic Auth)" as HttpApi
+  interface "Kafka\nSASL_SSL / SCRAM-SHA-256" as KafkaApi
+}
+
+Curator --> Platform : формулирует задания,\nпринимает результат по критериям
+Student --> Service : разворачивает сервис,\nнаблюдает GET /health
+Student --> HttpApi : вручную читает текст задания
+
+Service <--> KafkaApi : "->" account.registration.request / account.service.heartbeat\n"<-" account.registration.result / market.candle.closed
+
+note bottom of Service
+  strategy.recommendation.* (публикация рекомендаций)
+  вне кода Задания 2 — см. docs/project-description.md
+end note
+
+note bottom of Platform
+  Единственная внешняя система по текущим границам
+  проекта — других внешних систем нет (допущение).
+end note
+
+@enduml

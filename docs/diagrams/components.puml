@@ -1,0 +1,44 @@
+@startuml components
+title vwap-reversion — компонентная диаграмма (Задание 2)
+
+cloud "omsu.7bits.it (Kafka)" as KafkaCloud
+
+package "cmd/service" {
+  [main] as Main
+}
+
+package "internal" {
+  [HTTP Server (/health)] as HttpServer
+  [Health Registry] as HealthRegistry
+  [Config] as Config
+  [Kafka Connector\n(internal/broker)] as Broker
+  [Registration & Heartbeat\n(internal/registration)] as Registration
+  [Candle Consumer\n(internal/candles)] as Candles
+  [Event Envelope / Models\n(internal/events)] as Events
+}
+
+[Strategy Engine\n(не реализовано, следующее задание)] as Strategy
+
+Main --> Config : читает env
+Main --> HttpServer : запускает
+Main --> Broker : строит Dialer/Transport,\nProducer/Consumer
+Main --> Registration : запускает flow + heartbeat
+Main --> Candles : запускает после REGISTERED
+
+HttpServer --> HealthRegistry : агрегирует статус
+
+Registration --> HealthRegistry : checker "registration"
+Broker --> HealthRegistry : checkers "heartbeat-producer",\n"registration-reader", "candle-reader"
+
+Registration --> Broker : Producer / Consumer
+Candles --> Broker : Consumer
+
+Registration --> Events : строит/разбирает Envelope
+Candles --> Events : строит/разбирает Envelope
+
+Broker --> KafkaCloud : SASL_SSL / SCRAM-SHA-256
+
+Candles ..> Strategy : processedCandles\n(вход для будущей стратегии)
+Strategy ..> Broker : публикация рекомендаций\n(вне объёма Задания 2)
+
+@enduml

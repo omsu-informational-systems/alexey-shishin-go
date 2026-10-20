@@ -3,7 +3,9 @@ FROM golang:1.26-alpine AS builder
 ARG SERVICE_VERSION=0.1.0
 WORKDIR /src
 
-COPY go.mod ./
+COPY go.mod go.sum ./
+RUN go mod download
+
 COPY cmd ./cmd
 COPY internal ./internal
 
